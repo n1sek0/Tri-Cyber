@@ -41,6 +41,7 @@ public class CharacterController2D : MonoBehaviour
 			OnCrouchEvent = new BoolEvent();
 	}
 
+	
 	private void FixedUpdate()
 	{
 		bool wasGrounded = m_Grounded;
@@ -143,4 +144,9 @@ public class CharacterController2D : MonoBehaviour
 		theScale.x *= -1;
 		transform.localScale = theScale;
 	}
+	public bool FacingRight
+	{
+		get { return m_FacingRight; }
+	}
+	
 }
