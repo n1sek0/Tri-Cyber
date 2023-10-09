@@ -11,6 +11,11 @@ public class PlayerMovement : MonoBehaviour
     public GameObject bala;
     public Transform balaPoint;
 
+    private bool canDash = true; // Flag to track if the player can dash
+    public float dashForce = 100f; // The force applied during the dash
+    public float dashDuration = 0.2f; // The duration of the dash in seconds
+    private float dashTimer = 0f; // Timer to track the dash duration
+
     void Awake()
     {
         animator = GetComponent<Animator>();
@@ -25,43 +30,40 @@ public class PlayerMovement : MonoBehaviour
         if (Input.GetButtonDown("Jump"))
         {
             jump = true;
-            animator.SetBool("isJumping", true);
         }
 
-        if (Input.GetKeyDown(KeyCode.X))
+        if (Input.GetKeyDown(KeyCode.C) && canDash)
         {
-            Shoot();
+            Dash();
         }
-
-        // Verifica se a animação de ataque terminou para voltar à animação de idle
-        if (isAtk && animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1f)
-        {
-            isAtk = false;
-            animator.SetInteger("transition", 0);
-        }
-    }
-
-    public void OnLanding()
-    {
-        animator.SetBool("isJumping", false);
     }
 
     void FixedUpdate()
     {
         controller.Move(horizontalMove * Time.fixedDeltaTime, false, jump);
         jump = false;
+
+        if (dashTimer > 0f)
+        {
+            dashTimer -= Time.fixedDeltaTime;
+            if (dashTimer <= 0f)
+            {
+                canDash = true;
+            }
+        }
     }
 
-    void Shoot()
+    void Dash()
     {
-        if (!isAtk)
+        if (horizontalMove != 0f)
         {
-            isAtk = true;
-            animator.SetInteger("transition", 1);
+            canDash = false;
+            dashTimer = dashDuration;
 
-            // Verificar a direção do jogador para definir a rotação da bala
-            Vector3 balaRotation = Quaternion.Euler(0, 0, controller.FacingRight ? 0f : 180f) * balaPoint.rotation.eulerAngles;
-            Instantiate(bala, balaPoint.position, Quaternion.Euler(balaRotation));
+            // Apply a dash force in the direction of movement
+            controller.Move(horizontalMove * dashForce * Time.fixedDeltaTime, false, false);
         }
     }
 }
+
+
