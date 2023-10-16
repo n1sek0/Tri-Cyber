@@ -31,7 +31,6 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-        
         horizontalMove = Input.GetAxisRaw("Horizontal") * runSpeed;
 
         animator.SetFloat("Speed", Mathf.Abs(horizontalMove));
@@ -50,7 +49,13 @@ public class PlayerMovement : MonoBehaviour
         {
             Shoot();
         }
+
+        if (Input.GetKeyDown(KeyCode.Z))
+        {
+            AtaqueEspecial();
+        }
     }
+
 
     void FixedUpdate()
     {
@@ -105,14 +110,18 @@ public class PlayerMovement : MonoBehaviour
     
     void AtaqueEspecial()
     {
-        animator.SetInteger("transition", 1);
+        if (transition == 0)
+        {
+            transition = 1;
+            animator.SetInteger("transition", transition);
 
-        GameObject bullet = Instantiate(balaEspecial, balaPoint.position, balaPoint.rotation);
-        Bala bulletScript = bullet.GetComponent<Bala>();
-        bulletScript.SetDirection(transform.localScale.x);
+            GameObject bullet = Instantiate(balaEspecial, balaPoint.position, balaPoint.rotation);
+            Bala bulletScript = bullet.GetComponent<Bala>();
+            bulletScript.SetDirection(transform.localScale.x);
 
-        canShoot = false;
-        Invoke("ResetShootCooldown", shootCooldown);
+            canShoot = false;
+            Invoke("ResetShootCooldown", shootCooldown);
+        }
     }
 
 
