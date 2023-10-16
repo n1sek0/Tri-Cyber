@@ -566,7 +566,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1747714558}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -3.37, y: 2.84, z: 0}
+  m_LocalPosition: {x: -2.87, y: 1.68, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -591,8 +591,10 @@ MonoBehaviour:
   controller: {fileID: 1747714562}
   runSpeed: 200
   animator: {fileID: 1747714566}
-  bala: {fileID: 47741755327189898, guid: e54b437c572df8240964aba1323f4f66, type: 3}
-  balaPoint: {fileID: 903022483}
+  bala: {fileID: 0}
+  balaPoint: {fileID: 0}
+  dashForce: 30
+  dashDuration: 0.2
 --- !u!95 &1747714566
 Animator:
   serializedVersion: 4
