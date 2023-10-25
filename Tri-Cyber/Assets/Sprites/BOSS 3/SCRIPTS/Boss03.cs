@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,6 +8,8 @@ public class Boss03 : MonoBehaviour
     public float speed;
 
     public float jumpForce;
+
+    private bool isJumping;
 
     private Rigidbody2D rig;
 
@@ -24,6 +27,7 @@ public class Boss03 : MonoBehaviour
     void Update()
     {
         Move();
+        Jump();
     }
 
     private void Move()
@@ -45,6 +49,21 @@ public class Boss03 : MonoBehaviour
 
     void Jump()
     {
-        
+        if (Input.GetButtonDown("Jump"))
+        {
+            if (!isJumping)
+            {
+                rig.AddForce(new Vector2(0,jumpForce),ForceMode2D.Impulse);
+                isJumping = true;
+            }
+        }
+    }
+
+    void OnCollisionEnter2D(Collision2D col)
+    {
+        if (col.gameObject.layer == 6)
+        {
+            isJumping = false;
+        }
     }
 }
