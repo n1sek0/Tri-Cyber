@@ -5,65 +5,77 @@ using UnityEngine;
 
 public class Boss03 : MonoBehaviour
 {
-    public float speed;
+    public float maxHealth = 100f;
+    public float currentHealth;
+    public float lowHealthThreshold = 30f;
+    public float movementSpeed = 5f;
+    public float attackDamage = 10f;
+    public float superAttackDamage = 20f;
 
-    public float jumpForce;
+    private Transform player;
+    private bool isLowHealth = false;
 
-    private bool isJumping;
-
-    private Rigidbody2D rig;
-
-    private Animator anim;
-    
-    // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
-        rig = GetComponent<Rigidbody2D>();
-        anim = GetComponent<Animator>();
-
+        currentHealth = maxHealth;
+        player = GameObject.FindGameObjectWithTag("Player").transform;
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        Move();
-        Jump();
-    }
-
-    private void Move()
-    {
-        float movement = Input.GetAxis("Horizontal");
-        Debug.Log(movement);
-        rig.velocity = new Vector2(movement * speed, rig.velocity.y);
-
-        if (movement > 0)
+        if (currentHealth <= lowHealthThreshold && !isLowHealth)
         {
-            transform.eulerAngles = new Vector3(0,180,0);
+            isLowHealth = true;
+            PerformSuperAttack();
         }
-
-        if (movement < 0)
+        else if (IsPlayerInRange())
         {
-            transform.eulerAngles = new Vector3(0,0,0);
+            PerformAttack();
+        }
+        else
+        {
+            MoveTowardsPlayer();
         }
     }
 
-    void Jump()
+    private void MoveTowardsPlayer()
     {
-        if (Input.GetButtonDown("Jump"))
+        transform.position = Vector3.MoveTowards(transform.position, player.position, movementSpeed * Time.deltaTime);
+        // Implement any animation or logic for walking
+    }
+
+    private void PerformAttack()
+    {
+        // Implement attack logic here
+        // Apply damage to the player or trigger any other desired behavior
+    }
+
+    private void PerformSuperAttack()
+    {
+        // Implement super attack logic here
+        // Apply higher damage to the player or trigger any other desired behavior
+    }
+
+    public void TakeDamage(float damage)
+    {
+        currentHealth -= damage;
+        if (currentHealth <= 0f)
         {
-            if (!isJumping)
-            {
-                rig.AddForce(new Vector2(0,jumpForce),ForceMode2D.Impulse);
-                isJumping = true;
-            }
+            Die();
         }
     }
 
-    void OnCollisionEnter2D(Collision2D col)
+    private void Die()
     {
-        if (col.gameObject.layer == 6)
-        {
-            isJumping = false;
-        }
+        // Implement death logic here
+        // Destroy the enemy or trigger any other desired behavior
+    }
+
+    private bool IsPlayerInRange()
+    {
+        // Implement logic to check if the player is within attack range
+        // Return true if the player is in range, false otherwise
+        return false;
     }
 }
+
