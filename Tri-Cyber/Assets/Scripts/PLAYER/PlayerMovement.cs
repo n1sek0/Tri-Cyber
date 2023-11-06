@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -11,22 +12,28 @@ public class PlayerMovement : MonoBehaviour
     public GameObject bala;
     public Transform balaPoint;
     public GameObject balaEspecial;
+    public RectTransform healthBar;
 
-    private bool canDash = true; // Flag to track if the player can dash
-    public float dashForce = 100f; // The force applied during the dash
-    public float dashDuration = 0.2f; // The duration of the dash in seconds
-    private float dashTimer = 0f; // Timer to track the dash duration
+    private bool canDash = true;
+    public float dashForce = 100f;
+    public float dashDuration = 0.2f;
+    private float dashTimer = 0f;
 
-    private bool isInvulnerable = false; // Flag to track if the player is invulnerable
-    public float invulnerabilityDuration = 1f; // The duration of invulnerability in seconds
-    private float invulnerabilityTimer = 0f; // Timer to track the invulnerability duration
+    private bool isInvulnerable = false;
+    public float invulnerabilityDuration = 1f;
+    private float invulnerabilityTimer = 0f;
 
-    private bool canShoot = true; // Flag to track if the player can shoot
-    public float shootCooldown = 1f; // The cooldown between shots in seconds
+    private bool canShoot = true;
+    public float shootCooldown = 1f;
+
+    public float playerHealth = 5;
+    private AudioSource source;
+    public AudioClip somtiro;
 
     void Awake()
     {
         animator = GetComponent<Animator>();
+        TryGetComponent(out source);
     }
 
     void Update()
@@ -38,6 +45,14 @@ public class PlayerMovement : MonoBehaviour
         if (Input.GetButtonDown("Jump"))
         {
             jump = true;
+            animator.SetBool("isJumping", true);
+        }
+
+        if (jump)
+        {
+            controller.Jump();
+            jump = false;
+            canShoot = false; // Disable shooting while jumping
         }
 
         if (Input.GetKeyDown(KeyCode.C) && canDash)
@@ -45,17 +60,24 @@ public class PlayerMovement : MonoBehaviour
             Dash();
         }
 
-        if (Input.GetKeyDown(KeyCode.X) && horizontalMove == 0f && canShoot && transition == 0)
+        if (Input.GetKeyDown(KeyCode.X) && horizontalMove == 0f && canShoot && transition == 0 && !jump)
         {
             Shoot();
         }
 
-        if (Input.GetKeyDown(KeyCode.Z))
+        if (Input.GetKeyDown(KeyCode.Z) && horizontalMove == 0f && canShoot && transition == 0 && !jump)
         {
             AtaqueEspecial();
         }
-    }
 
+        if (playerHealth <= 0)
+        {
+            ResetScene();
+        }
+
+        float healthPercentage = (float)playerHealth / 5f;
+        healthBar.localScale = new Vector3(healthPercentage, 1f, 1f);
+    }
 
     void FixedUpdate()
     {
@@ -81,9 +103,15 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    public void OnLanding()
+    {
+        animator.SetBool("isJumping", false);
+        canShoot = true; // Enable shooting when landing
+    }
+
     void Dash()
     {
-        if (horizontalMove != 0f)
+        if (horizontalMove != 0f && SceneManager.GetActiveScene().name == "Boss2" && SceneManager.GetActiveScene().name == "Boss3")
         {
             canDash = false;
             dashTimer = dashDuration;
@@ -107,14 +135,14 @@ public class PlayerMovement : MonoBehaviour
         canShoot = false;
         Invoke("ResetShootCooldown", shootCooldown);
     }
-    
+
     void AtaqueEspecial()
     {
-        if (transition == 0)
+        if (transition == 0 && SceneManager.GetActiveScene().name == "Boss3" )
         {
             transition = 1;
             animator.SetInteger("transition", transition);
-
+            source.PlayOneShot(somtiro);
             GameObject bullet = Instantiate(balaEspecial, balaPoint.position, balaPoint.rotation);
             Bala bulletScript = bullet.GetComponent<Bala>();
             bulletScript.SetDirection(transform.localScale.x);
@@ -124,6 +152,10 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    void ResetScene()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
 
     void ResetShootCooldown()
     {
