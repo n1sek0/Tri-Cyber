@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
 public class Boss03 : MonoBehaviour
 {
     public float maxHealth = 100f;
@@ -16,6 +15,7 @@ public class Boss03 : MonoBehaviour
     private Animator anim;
     private Transform player;
     private bool isLowHealth = false;
+        
 
     private void Start()
     {
@@ -45,8 +45,6 @@ public class Boss03 : MonoBehaviour
 
     private void MoveTowardsPlayer()
     {
-        transform.position = Vector3.MoveTowards(transform.position, player.position, movementSpeed * Time.deltaTime);
-
         float movement = Input.GetAxis("Horizontal");
         Debug.Log(movement);
         rig.velocity = new Vector2(movement * movementSpeed, rig.velocity.y);
@@ -70,14 +68,22 @@ public class Boss03 : MonoBehaviour
 
     private int CalculateDamage()
     {
-        return 10; // Example value, replace with your own logic
+        return 10; // Exemplo de valor, substitua pela sua própria lógica
     }
 
     private void ApplyDamageToPlayer(int damage)
     {
-        // Implement the logic to apply the damage to the player
-        // You can reduce the player's health or trigger other actions based on the calculated damage value
+        // Implemente a lógica para aplicar o dano ao jogador
+        // Você pode reduzir a saúde do jogador ou acionar outras ações com base no valor de dano calculado
         currentHealth -= damage;
+    }
+    
+    private void ApplyDamageToPlayer(GameObject player, int damage)
+    {
+        // Implemente a lógica para aplicar o dano ao jogador usando o GameObject do jogador e o valor de dano fornecido
+        // Você pode reduzir a saúde do jogador ou acionar outras ações com base no valor de dano calculado
+        // Exemplo:
+        player.GetComponent<PlayerHealth>().TakeDamage(damage);
     }
 
     private void PerformSuperAttack()
@@ -87,21 +93,21 @@ public class Boss03 : MonoBehaviour
         if (target != null)
         {
             int damage = CalculateSuperAttackDamage();
-            ApplyDamage(target, damage);
+            ApplyDamageToPlayer(target, damage);
             TriggerSuperAttackEffects();
         }
     }
 
     private int CalculateSuperAttackDamage()
     {
-        return 50; // Example value, replace with your own logic
+        return 50; // Exemplo de valor, substitua pela sua própria lógica
     }
 
     private void TriggerSuperAttackEffects()
     {
-        // Implement the logic to trigger any other desired effects specific to the super attack
-        // This can include visual effects, sound effects, animations, etc.
-        // Example:
+        // Implemente a lógica para acionar quaisquer outros efeitos desejados específicos do super ataque
+        // Isso pode incluir efeitos visuais, efeitos sonoros, animações, etc.
+        // Exemplo:
         superAttackEffects.Play();
     }
 
@@ -116,20 +122,20 @@ public class Boss03 : MonoBehaviour
 
     private void Die()
     {
-        // Implement death logic here
-        // Destroy the enemy or trigger any other desired behavior
-        // Example: Destroy the enemy game object
+        // Implemente a lógica de morte aqui
+        // Destrua o inimigo ou acione qualquer outro comportamento desejado
+        // Exemplo: Destrua o objeto do inimigo
         Destroy(gameObject);
     }
 
     private bool IsPlayerInRange()
     {
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
 
-        if (player != null)
+        if (playerObject != null)
         {
-            float distance = Vector3.Distance(transform.position, player.transform.position);
-            float attackRange = 10f; // Example value, replace with your desired attack range
+            float distance = Vector3.Distance(transform.position, playerObject.transform.position);
+            float attackRange = 10f; // Exemplo de valor, substitua pela sua própria faixa de ataque desejada
 
             if (distance <= attackRange)
             {
@@ -138,5 +144,13 @@ public class Boss03 : MonoBehaviour
         }
 
         return false;
+    }
+
+    private GameObject GetTarget()
+    {
+        // Implemente a lógica para obter o alvo desejado
+        // Por exemplo, você pode procurar por um objeto com uma determinada tag ou usar alguma outra lógica personalizada
+        // Retorne o GameObject do alvo ou null se nenhum alvo for encontrado
+        return null;
     }
 }
