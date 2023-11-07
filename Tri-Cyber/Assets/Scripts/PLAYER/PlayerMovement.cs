@@ -29,6 +29,10 @@ public class PlayerMovement : MonoBehaviour
     public float playerHealth = 5;
     private AudioSource source;
     public AudioClip somtiro;
+    public AudioClip somtironormal;
+    public AudioClip pulo;
+    public AudioClip dash;
+    public AudioClip run;
 
     void Awake()
     {
@@ -46,6 +50,7 @@ public class PlayerMovement : MonoBehaviour
         {
             jump = true;
             animator.SetBool("isJumping", true);
+            source.PlayOneShot(pulo);
         }
 
         if (jump)
@@ -77,6 +82,11 @@ public class PlayerMovement : MonoBehaviour
 
         float healthPercentage = (float)playerHealth / 5f;
         healthBar.localScale = new Vector3(healthPercentage, 1f, 1f);
+        
+        if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.RightArrow))
+        {
+            source.PlayOneShot(run);
+        }
     }
 
     void FixedUpdate()
@@ -115,7 +125,7 @@ public class PlayerMovement : MonoBehaviour
         {
             canDash = false;
             dashTimer = dashDuration;
-
+            source.PlayOneShot(dash);
             controller.Move(horizontalMove * dashForce * Time.fixedDeltaTime, false, false);
 
             isInvulnerable = true;
@@ -127,7 +137,7 @@ public class PlayerMovement : MonoBehaviour
     {
         transition = 1;
         animator.SetInteger("transition", transition);
-
+        source.PlayOneShot(somtironormal);
         GameObject bullet = Instantiate(bala, balaPoint.position, balaPoint.rotation);
         Bala bulletScript = bullet.GetComponent<Bala>();
         bulletScript.SetDirection(transform.localScale.x);

@@ -1079,6 +1079,11 @@ MonoBehaviour:
   invulnerabilityDuration: 0.5
   shootCooldown: 0.2
   playerHealth: 15
+  somtiro: {fileID: 8300000, guid: 9414651f30d198f408eda949cea3fa2f, type: 3}
+  somtironormal: {fileID: 8300000, guid: fa1d9ba82e568214f9ecfc8dc5fee8da, type: 3}
+  pulo: {fileID: 8300000, guid: dc6781e7e4e3c1f48a8cd9d4baac7bc2, type: 3}
+  dash: {fileID: 8300000, guid: 004777d9427a8484983b2bf3b959302b, type: 3}
+  run: {fileID: 8300000, guid: a87e1d5a4b3442049800782ff7e9edca, type: 3}
 --- !u!95 &1747714566
 Animator:
   serializedVersion: 4
@@ -1111,7 +1116,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0
-  m_Volume: 1
+  m_Volume: 0.738
   m_Pitch: 1
   Loop: 0
   Mute: 0
