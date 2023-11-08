@@ -9,15 +9,16 @@ public class Boss : MonoBehaviour
     public float vida = 40f;
     public float velocidade = 2;
     public float velocidadeEstagio2 = 6f;
-    public float taxaDeTiro = 5f;
-    public float tempoDesdeUltimoTiro = 0;
     public float tempoEntreTiros = 2f;
     public float patrolDistance = 5.0f;
+    public float attackDistance = 10.0f;
     public float speedBuleet = 11;
 
     [Header("Bool:")]
     public bool estaMorto = false;
     private bool movingRight = true;
+    private bool isShooting = false;
+    private bool isStopped = false;
 
     [Header("Componentes")]
     public Rigidbody2D rig;
@@ -29,12 +30,18 @@ public class Boss : MonoBehaviour
     public AudioSource source;
 
     private int estagioAtual = 1;
-    public bool isShooting = false;
-    private Vector3 startPosition; 
+    private Vector3 startPosition;
+    private enum State
+    {
+        Patrol,
+        Attack,
+        Dead
+    }
+    private State currentState = State.Patrol;
 
     private void Start()
     {
-        source = GetComponent<AudioSource>();
+        
         rig = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
         estagioAtual = 1;
@@ -46,49 +53,67 @@ public class Boss : MonoBehaviour
         if (estaMorto)
             return;
 
-        if (estagioAtual == 1)
-        {
-            MoverEstagio1();
-        }
-        else if (estagioAtual == 2)
-        {
-            MoverEstagio2();
-        }
-        if (PodeAtirar())
-        {
-            Vector3 direcaoParaJogador = jogador.position - transform.position;
-            float anguloParaJogador = Vector3.Angle(Vector3.right, direcaoParaJogador);
+        float distanceToPlayer = Vector3.Distance(transform.position, jogador.position);
+        bool jogadorTaNaDireita =  transform.position.x  < jogador.position.x;
 
-            if (Mathf.Abs(anguloParaJogador) < 30f || Math.Abs(anguloParaJogador) > 30f)
-            {
-                if (!isShooting)
-                {
-                    StartCoroutine(AtirarCoroutine());
-                }
-            }
-        }
-
-        if (estaMorto == false)
+        switch (currentState)
         {
-            Verify();
+            case State.Patrol:
+                MoverPatrulha(distanceToPlayer, jogadorTaNaDireita);
+                break;
+
+            case State.Attack:
+                Atacar(distanceToPlayer, jogadorTaNaDireita);
+                break;
+
+            case State.Dead:
+                Morrer();
+                break;
         }
     }
-    void Verify()
+
+    private void MoverPatrulha(float distanceToPlayer, bool jogadorNaDireita)
     {
-        if (vida <= 0)
+        if (distanceToPlayer <= attackDistance && movingRight == jogadorNaDireita)
         {
-            estaMorto = true;
-            playAudio(0);
-            anim.SetTrigger("Dead");
-            Destroy(GetComponent<Rigidbody2D>());
-            Destroy(GetComponent<BoxCollider2D>());
-            Invoke("playAudio", 2.8f);
-            Destroy(gameObject, 3f);
+            isStopped = true;
+            currentState = State.Attack;
         }
-        if (vida <= 20)
+        else
         {
-            estagioAtual = 2;
+            isStopped = false;
+
+            if (estagioAtual == 1)
+            {
+                MoverEstagio1();
+            }
+            else if (estagioAtual == 2)
+            {
+                MoverEstagio2();
+            }
         }
+    }
+
+    private void Atacar(float distanceToPlayer, bool direcaoParaJogador)
+    {
+        isStopped = true;
+
+        if (distanceToPlayer > attackDistance || movingRight != direcaoParaJogador)
+        {
+            isShooting = false;
+            isStopped = false;
+            currentState = State.Patrol;
+        }
+
+        if (!isShooting)
+        {
+            StartCoroutine(AtirarCoroutine());
+        }
+    }
+
+    private void Morrer()
+    {
+        // Lógica de morte aqui
     }
 
     private bool PodeAtirar()
@@ -104,26 +129,16 @@ public class Boss : MonoBehaviour
     private IEnumerator AtirarCoroutine()
     {
         isShooting = true;
-        if (isShooting == true)
-        {
-            velocidade = 0f;
-            velocidadeEstagio2 = 0f;
-        }
         anim.SetBool("attack", true);
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSecondsRealtime(0.5f);
+        isShooting = false;
         playAudio(1);
         GameObject bullet = Instantiate(bala, pontoDeTiro.position, pontoDeTiro.rotation);
         Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();
         rb.velocity = new Vector2(speedBuleet, 0);
         Destroy(bullet, 2f);
         anim.SetBool("attack", false);
-        yield return new WaitForSeconds(1f); 
-        isShooting = false;
-        if (isShooting == false)
-        {
-            velocidade = 3f;
-            velocidadeEstagio2 = 7f;
-        }
+        yield return new WaitForSecondsRealtime(3f);
     }
 
     private void MoverEstagio1()
@@ -140,7 +155,7 @@ public class Boss : MonoBehaviour
             rig.velocity = new Vector2(-velocidade, rig.velocity.y);
             transform.localScale = new Vector3(-Mathf.Abs(transform.localScale.x), 0.5159f, 0.5159f);
         }
-        
+
         if (transform.position.x > startPosition.x + patrolDistance && movingRight)
         {
             movingRight = false;
@@ -156,13 +171,14 @@ public class Boss : MonoBehaviour
         if (movingRight)
         {
             rig.velocity = new Vector2(velocidadeEstagio2, rig.velocity.y);
-            transform.localScale = new Vector3(Mathf.Abs(transform.localScale.x), 0.5159f, 0.5159f);
+            transform.localScale =  new Vector3(Mathf.Abs(transform.localScale.x), 0.5159f, 0.5159f);
         }
         else
         {
             rig.velocity = new Vector2(-velocidadeEstagio2, rig.velocity.y);
             transform.localScale = new Vector3(-Mathf.Abs(transform.localScale.x), 0.5159f, 0.5159f);
         }
+
         if (transform.position.x > startPosition.x + patrolDistance && movingRight)
         {
             movingRight = false;
@@ -178,8 +194,10 @@ public class Boss : MonoBehaviour
         if (collision.gameObject.tag == "BalaEnemy")
         {
             vida--;
+            
         }
     }
+
     void playAudio(int valor)
     {
         if (valor >= 0 && valor < audios.Length)
@@ -188,4 +206,19 @@ public class Boss : MonoBehaviour
             source.Play();
         }
     }
+
+    // Função para controlar quando o inimigo está parado
+    public void SetStopped(bool stopped)
+    {
+        isStopped = stopped;
+    }
+
+    // Função para verificar se o inimigo está virado de frente para o jogador
+    private bool EstaViradoParaJogador(Vector3 direcaoParaJogador)
+    {
+        Vector3 direcaoInimigo = transform.right;
+        float angulo = Vector3.Angle(direcaoInimigo, direcaoParaJogador);
+        return angulo < 35.0f; // Defina o ângulo desejado para "frente" aqui
+    }
 }
+
