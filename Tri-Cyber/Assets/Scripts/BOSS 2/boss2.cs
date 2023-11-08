@@ -8,7 +8,7 @@ public class boss2 : MonoBehaviour
     [Header("Float:")]
     public float vida = 40f;
     public float velocidade = 2;
-    public float velocidadeEstagio2 = 6f;
+    public float velocidadeEstagio2 = 7f;
     public float taxaDeTiro = 5f;
     public float tempoDesdeUltimoTiro = 0;
     public float tempoEntreTiros = 2f;
@@ -88,6 +88,7 @@ public class boss2 : MonoBehaviour
         if (vida <= 20)
         {
             estagioAtual = 2;
+            anim.SetInteger("Transition", 1);
         }
     }
 
@@ -150,11 +151,13 @@ public class boss2 : MonoBehaviour
     {
         if (movingRight)
         {
+            speedBuleet = 15;
             rig.velocity = new Vector2(velocidadeEstagio2, rig.velocity.y);
             transform.localScale = new Vector3(Mathf.Abs(transform.localScale.x), 1.77636f, 1.77636f);
         }
         else
         {
+            speedBuleet = -15;
             rig.velocity = new Vector2(-velocidadeEstagio2, rig.velocity.y);
             transform.localScale = new Vector3(-Mathf.Abs(transform.localScale.x), 1.77636f, 1.77636f);
         }
@@ -168,7 +171,7 @@ public class boss2 : MonoBehaviour
         }
     }
 
-    private void OnCollisionEnter(Collision collision)
+    private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.tag == "BalaEnemy")
         {
