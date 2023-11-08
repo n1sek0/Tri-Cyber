@@ -107,20 +107,31 @@ public class boss2 : MonoBehaviour
         isShooting = true;
         anim.SetBool("IsFire", true);
         yield return new WaitForSeconds(1f);
+    
         if (estaMorto)
         {
             isShooting = false;
             yield break;
         }
+
         playAudio(1);
+
         GameObject bullet = Instantiate(bala, pontoDeTiro.position, pontoDeTiro.rotation);
         Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();
+        
+        if (!movingRight)
+        {
+            bullet.transform.Rotate(new Vector3(0, 0, 180));
+        }
+
         rb.velocity = new Vector2(speedBuleet, 0);
         Destroy(bullet, 2f);
+    
         anim.SetBool("IsFire", false);
-        yield return new WaitForSeconds(1f); 
+        yield return new WaitForSeconds(1f);
         isShooting = false;
     }
+
 
     private void MoverEstagio1()
     {
