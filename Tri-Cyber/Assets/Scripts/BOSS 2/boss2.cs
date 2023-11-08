@@ -1,146 +1,186 @@
-  using System;
-  using System.Collections;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class boss2 : MonoBehaviour
 {
     [Header("Float:")]
-    public float life = 40f;
-    public float currentHealth;
-    public float speed = 2;
-    public float timer;
-    public float walktime;
-    public float fireRate = 5f;
-    public float timeSinceLastShot = 5f;
-    
+    public float vida = 40f;
+    public float velocidade = 2;
+    public float velocidadeEstagio2 = 6f;
+    public float taxaDeTiro = 5f;
+    public float tempoDesdeUltimoTiro = 0;
+    public float tempoEntreTiros = 2f;
+    public float patrolDistance = 5.0f;
+    public float speedBuleet = 11;
+
     [Header("Bool:")]
-    public bool stage1 = true;
-    public bool stage2;
-    public bool walkRight = true;
-    public bool Isdead;
-    public bool isfire;
-    
-    [Header("Components")]
+    public bool estaMorto = false;
+    private bool movingRight = true;
+
+    [Header("Componentes")]
     public Rigidbody2D rig;
     public Animator anim;
-    public GameObject bullet;
-    public GameObject bullet2;
-    public Transform firePoint;
-    public Transform player;
-    void Start()
+    public GameObject bala;
+    public Transform pontoDeTiro;
+    public Transform jogador;
+    public AudioClip[] audios;
+    public AudioSource source;
+
+    private int estagioAtual = 1;
+    private bool isShooting = false;
+    private Vector3 startPosition; 
+
+    private void Start()
     {
+        source = GetComponent<AudioSource>();
         rig = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
-        
-    }
-    void Update()
-    {
-        if (Isdead == false)
-        {
-            OlharPara();
-            dead();
-        }
+        estagioAtual = 1;
+        startPosition = transform.position;
     }
 
-    private void FixedUpdate()
+    private void Update()
     {
-        if (Isdead == false)
-        {
-            move();
-        }
-    }
+        if (estaMorto)
+            return;
 
-    void move()
-    {
-        if (stage1 == true)
+        if (estagioAtual == 1)
         {
-            timer += Time.deltaTime;
-        
-            if (timer >= walktime)
+            MoverEstagio1();
+        }
+        else if (estagioAtual == 2)
+        {
+            MoverEstagio2();
+        }
+        if (PodeAtirar())
+        {
+            Vector3 direcaoParaJogador = jogador.position - transform.position;
+            float anguloParaJogador = Vector3.Angle(Vector3.right, direcaoParaJogador);
+
+            if (Mathf.Abs(anguloParaJogador) < 30f || Math.Abs(anguloParaJogador) > 30f)
             {
-                walkRight = !walkRight;
-                timer = 0f;
-            }
-            if (walkRight)
-            {
-                if (isfire == false)
+                if (!isShooting)
                 {
-                    anim.SetInteger("Transition", 1);
+                    StartCoroutine(AtirarCoroutine());
                 }
-                transform.eulerAngles = new Vector2(0,0);
-                rig.velocity = Vector2.right * speed;
-            }
-
-            if (!walkRight)
-            {
-                if (isfire == false)
-                {
-                    anim.SetInteger("Transition", 1);
-                }
-                transform.eulerAngles = new Vector2(0,180);
-                rig.velocity = Vector2.left * speed;
             }
         }
 
-        if (stage2 == true)
+        if (estaMorto == false)
         {
-            speed = 10f;
-            timer = 0f;
-            walktime = 0f;
-            walkRight = true;
-            if (isfire == false)
-            {
-                anim.SetInteger("Transition", 1);
-            }
-            transform.eulerAngles = new Vector2(0,180);
-            rig.velocity = Vector2.right * speed;
-
+            Verify();
         }
     }
-    void dead()
+    void Verify()
     {
-        if (life <= 0)
+        if (vida <= 0)
         {
-            Isdead = true;
+            estaMorto = true;
+            playAudio(0);
             anim.SetTrigger("Dead");
             Destroy(GetComponent<Rigidbody2D>());
             Destroy(GetComponent<BoxCollider2D>());
-            Destroy(gameObject, 5f);
-            
+            Invoke("playAudio", 2.8f);
+            Destroy(gameObject, 3f);
+        }
+        if (vida <= 20)
+        {
+            estagioAtual = 2;
         }
     }
-    void OlharPara()
+
+    private bool PodeAtirar()
     {
-        if (player == null)
+        if (estaMorto)
         {
-            Debug.LogWarning("Player not found.");
-            return;
-        }
-        Vector3 directionToPlayer = player.position - transform.position;
-        directionToPlayer.Normalize();
-        float angle = Mathf.Atan2(directionToPlayer.y, directionToPlayer.x) * Mathf.Rad2Deg;
-        if (stage1 == true)
-        {
-            transform.rotation = Quaternion.Euler(new Vector3(0, angle, 0));
-        }
-        
-        timeSinceLastShot -= Time.deltaTime;
-        if (timeSinceLastShot <=0 && stage1 == true)
-        {
-            // colocar o ataque do primeiro stagio 
-            timeSinceLastShot = 4f;
-        }
-        if (timeSinceLastShot <=0 && stage2 == true)
-        {
-            // colocar o ataque do segundo stagio
-            timeSinceLastShot = 5f;
+            return false;
         }
 
-        if (life <= 20)
+        return true;
+    }
+
+    private IEnumerator AtirarCoroutine()
+    {
+        isShooting = true;
+        anim.SetBool("IsFire", true);
+        yield return new WaitForSeconds(1f);
+        if (estaMorto)
         {
-            stage1 = false;
-            stage2 = true;
+            isShooting = false;
+            yield break;
+        }
+        playAudio(1);
+        GameObject bullet = Instantiate(bala, pontoDeTiro.position, pontoDeTiro.rotation);
+        Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();
+        rb.velocity = new Vector2(speedBuleet, 0);
+        Destroy(bullet, 2f);
+        anim.SetBool("IsFire", false);
+        yield return new WaitForSeconds(1f); 
+        isShooting = false;
+    }
+
+    private void MoverEstagio1()
+    {
+        if (movingRight)
+        {
+            speedBuleet = 15;
+            rig.velocity = new Vector2(velocidade, rig.velocity.y);
+            transform.localScale = new Vector3(Mathf.Abs(transform.localScale.x), 1.77636f, 1.77636f);
+        }
+        else
+        {
+            speedBuleet = -15;
+            rig.velocity = new Vector2(-velocidade, rig.velocity.y);
+            transform.localScale = new Vector3(-Mathf.Abs(transform.localScale.x), 1.77636f, 1.77636f);
+        }
+        
+        if (transform.position.x > startPosition.x + patrolDistance && movingRight)
+        {
+            movingRight = false;
+        }
+        else if (transform.position.x < startPosition.x - patrolDistance && !movingRight)
+        {
+            movingRight = true;
+        }
+    }
+
+    private void MoverEstagio2()
+    {
+        if (movingRight)
+        {
+            rig.velocity = new Vector2(velocidadeEstagio2, rig.velocity.y);
+            transform.localScale = new Vector3(Mathf.Abs(transform.localScale.x), 1.77636f, 1.77636f);
+        }
+        else
+        {
+            rig.velocity = new Vector2(-velocidadeEstagio2, rig.velocity.y);
+            transform.localScale = new Vector3(-Mathf.Abs(transform.localScale.x), 1.77636f, 1.77636f);
+        }
+        if (transform.position.x > startPosition.x + patrolDistance && movingRight)
+        {
+            movingRight = false;
+        }
+        else if (transform.position.x < startPosition.x - patrolDistance && !movingRight)
+        {
+            movingRight = true;
+        }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.tag == "BalaEnemy")
+        {
+            vida--;
+        }
+    }
+    void playAudio(int valor)
+    {
+        if (valor >= 0 && valor < audios.Length)
+        {
+            source.clip = audios[valor];
+            source.Play();
         }
     }
 }
