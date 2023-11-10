@@ -65,13 +65,9 @@ public class Boss : MonoBehaviour
             case State.Attack:
                 Atacar(distanceToPlayer, jogadorTaNaDireita);
                 break;
-
-            case State.Dead:
-                Morrer();
-                break;
         }
 
-        if (estaMorto)
+        if (estaMorto == false)
         {
             Verify();
         }
@@ -82,9 +78,11 @@ public class Boss : MonoBehaviour
         if (vida <= 0)
         {
             estaMorto = true;
+            velocidade = 0f;
+            anim.SetTrigger("dead");
             Destroy(GetComponent<Rigidbody2D>());
             Destroy(GetComponent<BoxCollider2D>());
-            Destroy(gameObject, 1f);
+            Destroy(gameObject, 3f);
         }
     }
 
@@ -127,11 +125,6 @@ public class Boss : MonoBehaviour
         }
     }
 
-    private void Morrer()
-    {
-        // Lógica de morte aqui
-    }
-
     private bool PodeAtirar()
     {
         if (estaMorto)
@@ -159,7 +152,7 @@ public class Boss : MonoBehaviour
             yield return new WaitForSecondsRealtime(3f);
         }
 
-        if (vida <=20)
+        if (vida <20)
         {
             isShooting = true;
             anim.SetBool("attack", true);
@@ -223,12 +216,16 @@ public class Boss : MonoBehaviour
         }
     }
 
-    private void OnCollisionEnter(Collision collision)
+    private void OnTriggerEnter2D(Collider2D other)
     {
-        if (collision.gameObject.tag == "BalaEnemy")
+        if (other.gameObject.tag == "BalaEnemy")
         {
             vida--;
-            
+        }
+
+        if (other.gameObject.tag == "BalaEnemy2")
+        {
+            vida -= 4;
         }
     }
     
