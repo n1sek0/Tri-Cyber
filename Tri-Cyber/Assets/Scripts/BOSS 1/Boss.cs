@@ -27,7 +27,6 @@ public class Boss : MonoBehaviour
     public GameObject balaespecial;
     public Transform pontoDeTiro;
     public Transform jogador;
-    public AudioClip[] audios;
     public AudioSource source;
 
     private int estagioAtual = 1;
@@ -151,7 +150,7 @@ public class Boss : MonoBehaviour
             anim.SetBool("attack", true);
             yield return new WaitForSecondsRealtime(0.5f);
             isShooting = false;
-            playAudio(1);
+            source.Play();
             GameObject bullet = Instantiate(bala, pontoDeTiro.position, pontoDeTiro.rotation);
             Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();
             rb.velocity = new Vector2(speedBuleet, 0);
@@ -166,7 +165,7 @@ public class Boss : MonoBehaviour
             anim.SetBool("attack", true);
             yield return new WaitForSecondsRealtime(0.5f);
             isShooting = false;
-            playAudio(1);
+            source.Play();
             GameObject bullet = Instantiate(balaespecial, pontoDeTiro.position, pontoDeTiro.rotation);
             Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();
             rb.velocity = new Vector2(speedBuleet, 0);
@@ -232,15 +231,7 @@ public class Boss : MonoBehaviour
             
         }
     }
-
-    void playAudio(int valor)
-    {
-        if (valor >= 0 && valor < audios.Length)
-        {
-            source.clip = audios[valor];
-            source.Play();
-        }
-    }
+    
 
     // Função para controlar quando o inimigo está parado
     public void SetStopped(bool stopped)
