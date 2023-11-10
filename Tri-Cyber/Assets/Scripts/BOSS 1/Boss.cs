@@ -24,6 +24,7 @@ public class Boss : MonoBehaviour
     public Rigidbody2D rig;
     public Animator anim;
     public GameObject bala;
+    public GameObject balaespecial;
     public Transform pontoDeTiro;
     public Transform jogador;
     public AudioClip[] audios;
@@ -41,7 +42,7 @@ public class Boss : MonoBehaviour
 
     private void Start()
     {
-        
+        source = GetComponent<AudioSource>();
         rig = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
         estagioAtual = 1;
@@ -69,6 +70,22 @@ public class Boss : MonoBehaviour
             case State.Dead:
                 Morrer();
                 break;
+        }
+
+        if (estaMorto)
+        {
+            Verify();
+        }
+    }
+
+    void Verify()
+    {
+        if (vida <= 0)
+        {
+            estaMorto = true;
+            Destroy(GetComponent<Rigidbody2D>());
+            Destroy(GetComponent<BoxCollider2D>());
+            Destroy(gameObject, 1f);
         }
     }
 
@@ -128,17 +145,35 @@ public class Boss : MonoBehaviour
 
     private IEnumerator AtirarCoroutine()
     {
-        isShooting = true;
-        anim.SetBool("attack", true);
-        yield return new WaitForSecondsRealtime(0.5f);
-        isShooting = false;
-        playAudio(1);
-        GameObject bullet = Instantiate(bala, pontoDeTiro.position, pontoDeTiro.rotation);
-        Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();
-        rb.velocity = new Vector2(speedBuleet, 0);
-        Destroy(bullet, 2f);
-        anim.SetBool("attack", false);
-        yield return new WaitForSecondsRealtime(3f);
+        if (vida >21)
+        {
+            isShooting = true;
+            anim.SetBool("attack", true);
+            yield return new WaitForSecondsRealtime(0.5f);
+            isShooting = false;
+            playAudio(1);
+            GameObject bullet = Instantiate(bala, pontoDeTiro.position, pontoDeTiro.rotation);
+            Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();
+            rb.velocity = new Vector2(speedBuleet, 0);
+            Destroy(bullet, 2f);
+            anim.SetBool("attack", false);
+            yield return new WaitForSecondsRealtime(3f);
+        }
+
+        if (vida <=20)
+        {
+            isShooting = true;
+            anim.SetBool("attack", true);
+            yield return new WaitForSecondsRealtime(0.5f);
+            isShooting = false;
+            playAudio(1);
+            GameObject bullet = Instantiate(balaespecial, pontoDeTiro.position, pontoDeTiro.rotation);
+            Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();
+            rb.velocity = new Vector2(speedBuleet, 0);
+            Destroy(bullet, 2f);
+            anim.SetBool("attack", false);
+            yield return new WaitForSecondsRealtime(3f);
+        }
     }
 
     private void MoverEstagio1()
