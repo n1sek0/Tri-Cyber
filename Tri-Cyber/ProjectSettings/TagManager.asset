@@ -5,6 +5,11 @@ TagManager:
   serializedVersion: 2
   tags:
   - Enemy
+  - BalaEnemy
+  - Porta1
+  - Abridor
+  - BalaEnemy2
+  - BalaPlayer
   layers:
   - Default
   - TransparentFX

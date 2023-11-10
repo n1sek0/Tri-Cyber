@@ -121,7 +121,7 @@ public class PlayerMovement : MonoBehaviour
 
     void Dash()
     {
-        if (horizontalMove != 0f && SceneManager.GetActiveScene().name == "Boss2" && SceneManager.GetActiveScene().name == "Boss3")
+        if (horizontalMove != 0f && SceneManager.GetActiveScene().name == "Boss2" || SceneManager.GetActiveScene().name == "Boss3")
         {
             canDash = false;
             dashTimer = dashDuration;
@@ -148,7 +148,7 @@ public class PlayerMovement : MonoBehaviour
 
     void AtaqueEspecial()
     {
-        if (transition == 0 && SceneManager.GetActiveScene().name == "Boss3" )
+        if (transition == 0)
         {
             transition = 1;
             animator.SetInteger("transition", transition);
@@ -161,6 +161,29 @@ public class PlayerMovement : MonoBehaviour
             Invoke("ResetShootCooldown", shootCooldown);
         }
     }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.gameObject.tag == "BalaPlayer")
+        {
+            playerHealth--;
+        }
+    
+        if (other.gameObject.tag == "Enemy")
+        {
+            playerHealth -= 4;
+            Vector2 knockbackDirection = transform.position - other.transform.position;
+            knockbackDirection = knockbackDirection.normalized;
+            float knockbackForce = 20f; // Defina a força do knockback aqui
+
+            Vector2 knockbackVelocity = knockbackDirection * knockbackForce;
+            controller.Move(knockbackVelocity.x, false, false);
+
+            isInvulnerable = true;
+            invulnerabilityTimer = invulnerabilityDuration;
+        }
+    }
+
 
     void ResetScene()
     {

@@ -182,13 +182,19 @@ public class boss2 : MonoBehaviour
         }
     }
 
-    private void OnCollisionEnter2D(Collision2D collision)
+    private void OnTriggerEnter2D(Collider2D other)
     {
-        if (collision.gameObject.tag == "BalaEnemy")
+        if (other.gameObject.tag == "BalaEnemy")
         {
             vida--;
         }
+
+        if (other.gameObject.tag == "BalaEnemy2")
+        {
+            vida -= 4;
+        }
     }
+
     void playAudio(int valor)
     {
         if (valor >= 0 && valor < audios.Length)

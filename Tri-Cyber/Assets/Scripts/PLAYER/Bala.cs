@@ -38,4 +38,6 @@ public class Bala : MonoBehaviour
     {
         direction = newDirection;
     }
+    
+    
 }

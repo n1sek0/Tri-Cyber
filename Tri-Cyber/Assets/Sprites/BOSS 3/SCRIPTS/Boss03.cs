@@ -1,7 +1,7 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+
 public class Boss03 : MonoBehaviour
 {
     public float maxHealth = 100f;
@@ -15,7 +15,6 @@ public class Boss03 : MonoBehaviour
     private Animator anim;
     private Transform player;
     private bool isLowHealth = false;
-        
 
     private void Start()
     {
@@ -53,8 +52,7 @@ public class Boss03 : MonoBehaviour
         {
             transform.eulerAngles = new Vector3(0, 180, 0);
         }
-
-        if (movement < 0)
+        else if (movement < 0)
         {
             transform.eulerAngles = new Vector3(0, 0, 0);
         }
@@ -73,17 +71,13 @@ public class Boss03 : MonoBehaviour
 
     private void ApplyDamageToPlayer(int damage)
     {
-        // Implemente a lógica para aplicar o dano ao jogador
-        // Você pode reduzir a saúde do jogador ou acionar outras ações com base no valor de dano calculado
-        currentHealth -= damage;
-    }
-    
-    private void ApplyDamageToPlayer(GameObject player, int damage)
-    {
-        // Implemente a lógica para aplicar o dano ao jogador usando o GameObject do jogador e o valor de dano fornecido
-        // Você pode reduzir a saúde do jogador ou acionar outras ações com base no valor de dano calculado
-        // Exemplo:
-        player.GetComponent<PlayerHealth>().TakeDamage(damage);
+        GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
+
+        if (playerObject != null)
+        {
+            PlayerMovement playerMovement = playerObject.GetComponent<PlayerMovement>();
+            playerMovement.playerHealth -= damage;
+        }
     }
 
     private void PerformSuperAttack()
@@ -93,7 +87,7 @@ public class Boss03 : MonoBehaviour
         if (target != null)
         {
             int damage = CalculateSuperAttackDamage();
-            ApplyDamageToPlayer(target, damage);
+            ApplyDamageToPlayer(damage);
             TriggerSuperAttackEffects();
         }
     }
